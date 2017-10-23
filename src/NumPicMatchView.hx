@@ -26,7 +26,6 @@ class NumPicMatchView extends View<{model:NumPicMatchModel}>
 				<div style="float:left; margin: 4px;">
 					<div style={"width:" + Math.floor(100/(model.max+2)) +"vw; height: " + Math.floor(100/(model.max+2)) + "vw; border:1px solid black; font-family:webdings; font-size:" + Math.floor((100/(model.max+2))/(model.rand+1)) + "vw; text-align:center;"}>
 					<br/>
-					<br/>
 					<for {i in 0...model.rand}>
 						{model.char}
 					</for>

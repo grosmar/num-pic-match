@@ -381,7 +381,6 @@ NumPicMatchView.prototype = $extend(coconut_ui_View.prototype,{
 		var b2 = model.get_max() + 2;
 		var attr7 = { style : vdom__$Style_Style_$Impl_$.ofString(attr6 + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b2) / _$UInt_UInt_$Impl_$.toFloat(model.get_rand() + 1)) + "vw; text-align:center;")};
 		var children1 = vdom_VDom.h("br",{ });
-		var children2 = vdom_VDom.h("br",{ });
 		var _g2 = [];
 		var _g21 = 0;
 		var _g11 = model.get_rand();
@@ -389,11 +388,11 @@ NumPicMatchView.prototype = $extend(coconut_ui_View.prototype,{
 			var i1 = _g21++;
 			_g2.push(vdom__$VNode_VNode_$Impl_$.flatten([model.get_char()]));
 		}
-		var children3 = vdom_VDom.h("div",attr7,[children1,children2,vdom__$VNode_VNode_$Impl_$.flatten(_g2)]);
+		var children2 = vdom_VDom.h("div",attr7,[children1,vdom__$VNode_VNode_$Impl_$.flatten(_g2)]);
 		var b3 = model.get_max() + 2;
 		var attr8 = { style : vdom__$Style_Style_$Impl_$.ofString("text-align:center; width:100%; font-size:" + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b3) / 2) + "vw")};
 		var i2 = model.get_rand();
-		var children4 = vdom_VDom.h("div",attr4,[children3,vdom_VDom.h("div",attr8,[i2 == null ? "null" : "" + i2])]);
+		var children3 = vdom_VDom.h("div",attr4,[children2,vdom_VDom.h("div",attr8,[i2 == null ? "null" : "" + i2])]);
 		var _g12 = [];
 		var _g22 = 0;
 		while(_g22 < arr.length) {
@@ -403,11 +402,11 @@ NumPicMatchView.prototype = $extend(coconut_ui_View.prototype,{
 			var b4 = model.get_max() + 2;
 			var attr10 = "width:" + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b4)) + "vw; height: ";
 			var b5 = model.get_max() + 2;
-			var children5 = vdom_VDom.h("div",{ style : vdom__$Style_Style_$Impl_$.ofString(attr10 + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b5)) + "vw; border:1px solid black;")},null);
+			var children4 = vdom_VDom.h("div",{ style : vdom__$Style_Style_$Impl_$.ofString(attr10 + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b5)) + "vw; border:1px solid black;")},null);
 			var b6 = model.get_max() + 2;
-			_g12.push(vdom__$VNode_VNode_$Impl_$.flatten([vdom_VDom.h("div",attr9,[children5,vdom_VDom.h("div",{ style : vdom__$Style_Style_$Impl_$.ofString("text-align:center; width:100%; font-size:" + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b6) / 2) + "vw")},[i3 == null ? "null" : "" + i3])])]));
+			_g12.push(vdom__$VNode_VNode_$Impl_$.flatten([vdom_VDom.h("div",attr9,[children4,vdom_VDom.h("div",{ style : vdom__$Style_Style_$Impl_$.ofString("text-align:center; width:100%; font-size:" + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b6) / 2) + "vw")},[i3 == null ? "null" : "" + i3])])]));
 		}
-		return vdom_VDom.h("div",attr,[children,vdom_VDom.h("div",attr3,[children4,vdom__$VNode_VNode_$Impl_$.flatten(_g12)]),vdom_VDom.h("div",{ style : vdom__$Style_Style_$Impl_$.ofString("clear:both")},null)]);
+		return vdom_VDom.h("div",attr,[children,vdom_VDom.h("div",attr3,[children3,vdom__$VNode_VNode_$Impl_$.flatten(_g12)]),vdom_VDom.h("div",{ style : vdom__$Style_Style_$Impl_$.ofString("clear:both")},null)]);
 	}
 	,__class__: NumPicMatchView
 });
