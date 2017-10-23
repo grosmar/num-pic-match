@@ -1,0 +1,22 @@
+{
+  "name": "num-pic-match",
+  "version": "1.0.0",
+  "description": "Filter list of words with given criteria",
+  "main": "index.js",
+  "bin": {
+    "num-pic-match": "NumPicMatch.js"
+  },
+  "scripts": {
+    "install": "haxelib newrepo && haxelib install coconut.data && haxelib install coconut.vdom"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grosmar/num-pic-match.git"
+  },
+  "author": "grosmar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/grosmar/num-pic-match/issues"
+  },
+  "homepage": "https://github.com/grosmar/num-pic-match#readme"
+}
