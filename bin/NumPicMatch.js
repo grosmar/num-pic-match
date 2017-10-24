@@ -7,6 +7,28 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
+var EReg = function(r,opt) {
+	this.r = new RegExp(r,opt.split("u").join(""));
+};
+EReg.__name__ = true;
+EReg.prototype = {
+	match: function(s) {
+		if(this.r.global) {
+			this.r.lastIndex = 0;
+		}
+		this.r.m = this.r.exec(s);
+		this.r.s = s;
+		return this.r.m != null;
+	}
+	,matched: function(n) {
+		if(this.r.m != null && n >= 0 && n < this.r.m.length) {
+			return this.r.m[n];
+		} else {
+			throw new js__$Boot_HaxeError("EReg::matched");
+		}
+	}
+	,__class__: EReg
+};
 var HxOverrides = function() { };
 HxOverrides.__name__ = true;
 HxOverrides.cca = function(s,index) {
@@ -48,7 +70,17 @@ var List = function() {
 };
 List.__name__ = true;
 List.prototype = {
-	push: function(item) {
+	add: function(item) {
+		var x = new _$List_ListNode(item,null);
+		if(this.h == null) {
+			this.h = x;
+		} else {
+			this.q.next = x;
+		}
+		this.q = x;
+		this.length++;
+	}
+	,push: function(item) {
 		var x = new _$List_ListNode(item,this.h);
 		this.h = x;
 		if(this.q == null) {
@@ -75,6 +107,9 @@ List.prototype = {
 		this.length--;
 		return x;
 	}
+	,iterator: function() {
+		return new _$List_ListIterator(this.h);
+	}
 	,__class__: List
 };
 var _$List_ListNode = function(item,next) {
@@ -84,6 +119,21 @@ var _$List_ListNode = function(item,next) {
 _$List_ListNode.__name__ = true;
 _$List_ListNode.prototype = {
 	__class__: _$List_ListNode
+};
+var _$List_ListIterator = function(head) {
+	this.head = head;
+};
+_$List_ListIterator.__name__ = true;
+_$List_ListIterator.prototype = {
+	hasNext: function() {
+		return this.head != null;
+	}
+	,next: function() {
+		var val = this.head.item;
+		this.head = this.head.next;
+		return val;
+	}
+	,__class__: _$List_ListIterator
 };
 var Main = function() { };
 Main.__name__ = true;
@@ -113,6 +163,21 @@ Main.main = function() {
 		js_Browser.getLocalStorage().setItem("min",Std.string(_$UInt_UInt_$Impl_$.toFloat(model.get_min())));
 		js_Browser.getLocalStorage().setItem("max",Std.string(_$UInt_UInt_$Impl_$.toFloat(model.get_max())));
 	};
+	var client = new tink_http_JsClient();
+	tink_core__$Future_Future_$Impl_$.next(client.request(new tink_http_OutgoingRequest(new tink_http_OutgoingRequestHeader("GET",tink_url__$Host_Host_$Impl_$._new("ip.jsontest.com"),null,[]),tink_io__$IdealSource_IdealSource_$Impl_$.fromString(""))),function(res) {
+		return res.body.all();
+	}).handle(function(o) {
+		switch(o[1]) {
+		case 0:
+			var body = o[2];
+			console.log(body.toString());
+			break;
+		case 1:
+			var e = o[2];
+			console.log(e);
+			break;
+		}
+	});
 };
 Math.__name__ = true;
 var coconut_data_Model = function() { };
@@ -355,7 +420,7 @@ NumPicMatchView.prototype = $extend(coconut_ui_View.prototype,{
 			__tmp.push(i);
 		}
 		var arr = RandomHelper.shuffle(__tmp);
-		console.log(arr);
+		var length = model.get_max() - model.get_min() + 2;
 		var attr = { style : vdom__$Style_Style_$Impl_$.ofString("height:100%")};
 		var children = vdom_VDom.h("div",{ className : vdom__$Attr_ClassName_$Impl_$.ofString("no-print")},["Min: ",vdom_VDom.h("input",{ id : "min", oninput : function(event) {
 			var attr1;
@@ -374,12 +439,7 @@ NumPicMatchView.prototype = $extend(coconut_ui_View.prototype,{
 		}},["Randomize"])]);
 		var attr3 = { style : vdom__$Style_Style_$Impl_$.ofString("height:100%")};
 		var attr4 = { style : vdom__$Style_Style_$Impl_$.ofString("float:left; margin: 4px;")};
-		var b = model.get_max() + 2;
-		var attr5 = "width:" + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b)) + "vw; height: ";
-		var b1 = model.get_max() + 2;
-		var attr6 = attr5 + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b1)) + "vw; border:1px solid black; font-family:webdings; font-size:";
-		var b2 = model.get_max() + 2;
-		var attr7 = { style : vdom__$Style_Style_$Impl_$.ofString(attr6 + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b2) / _$UInt_UInt_$Impl_$.toFloat(model.get_rand() + 1)) + "vw; text-align:center;")};
+		var attr5 = { style : vdom__$Style_Style_$Impl_$.ofString("width:" + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(length + 1)) + "vw; height: " + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(length + 1)) + "vw; border:1px solid black; font-family:webdings; font-size:" + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(length + 1) / _$UInt_UInt_$Impl_$.toFloat(model.get_rand() + 1)) + "vw; text-align:center;")};
 		var children1 = vdom_VDom.h("br",{ });
 		var _g2 = [];
 		var _g21 = 0;
@@ -388,23 +448,16 @@ NumPicMatchView.prototype = $extend(coconut_ui_View.prototype,{
 			var i1 = _g21++;
 			_g2.push(vdom__$VNode_VNode_$Impl_$.flatten([model.get_char()]));
 		}
-		var children2 = vdom_VDom.h("div",attr7,[children1,vdom__$VNode_VNode_$Impl_$.flatten(_g2)]);
-		var b3 = model.get_max() + 2;
-		var attr8 = { style : vdom__$Style_Style_$Impl_$.ofString("text-align:center; width:100%; font-size:" + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b3) / 2) + "vw")};
+		var children2 = vdom_VDom.h("div",attr5,[children1,vdom__$VNode_VNode_$Impl_$.flatten(_g2)]);
+		var attr6 = { style : vdom__$Style_Style_$Impl_$.ofString("text-align:center; width:100%; font-size:" + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(length + 1) / 2) + "vw")};
 		var i2 = model.get_rand();
-		var children3 = vdom_VDom.h("div",attr4,[children2,vdom_VDom.h("div",attr8,[i2 == null ? "null" : "" + i2])]);
+		var children3 = vdom_VDom.h("div",attr4,[children2,vdom_VDom.h("div",attr6,[i2 == null ? "null" : "" + i2])]);
 		var _g12 = [];
 		var _g22 = 0;
 		while(_g22 < arr.length) {
 			var i3 = arr[_g22];
 			++_g22;
-			var attr9 = { style : vdom__$Style_Style_$Impl_$.ofString("float:left; margin: 4px;")};
-			var b4 = model.get_max() + 2;
-			var attr10 = "width:" + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b4)) + "vw; height: ";
-			var b5 = model.get_max() + 2;
-			var children4 = vdom_VDom.h("div",{ style : vdom__$Style_Style_$Impl_$.ofString(attr10 + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b5)) + "vw; border:1px solid black;")},null);
-			var b6 = model.get_max() + 2;
-			_g12.push(vdom__$VNode_VNode_$Impl_$.flatten([vdom_VDom.h("div",attr9,[children4,vdom_VDom.h("div",{ style : vdom__$Style_Style_$Impl_$.ofString("text-align:center; width:100%; font-size:" + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(b6) / 2) + "vw")},[i3 == null ? "null" : "" + i3])])]));
+			_g12.push(vdom__$VNode_VNode_$Impl_$.flatten([vdom_VDom.h("div",{ style : vdom__$Style_Style_$Impl_$.ofString("float:left; margin: 4px;")},[vdom_VDom.h("div",{ style : vdom__$Style_Style_$Impl_$.ofString("width:" + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(length + 1)) + "vw; height: " + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(length + 1)) + "vw; border:1px solid black;")},null),vdom_VDom.h("div",{ style : vdom__$Style_Style_$Impl_$.ofString("text-align:center; width:100%; font-size:" + Math.floor(_$UInt_UInt_$Impl_$.toFloat(100) / _$UInt_UInt_$Impl_$.toFloat(length + 1) / 2) + "vw")},[i3 == null ? "null" : "" + i3])])]));
 		}
 		return vdom_VDom.h("div",attr,[children,vdom_VDom.h("div",attr3,[children3,vdom__$VNode_VNode_$Impl_$.flatten(_g12)]),vdom_VDom.h("div",{ style : vdom__$Style_Style_$Impl_$.ofString("clear:both")},null)]);
 	}
@@ -456,8 +509,31 @@ Std.parseInt = function(x) {
 	}
 	return v;
 };
+Std.random = function(x) {
+	if(x <= 0) {
+		return 0;
+	} else {
+		return Math.floor(Math.random() * x);
+	}
+};
 var StringTools = function() { };
 StringTools.__name__ = true;
+StringTools.startsWith = function(s,start) {
+	if(s.length >= start.length) {
+		return HxOverrides.substr(s,0,start.length) == start;
+	} else {
+		return false;
+	}
+};
+StringTools.endsWith = function(s,end) {
+	var elen = end.length;
+	var slen = s.length;
+	if(slen >= elen) {
+		return HxOverrides.substr(s,slen - elen,elen) == end;
+	} else {
+		return false;
+	}
+};
 StringTools.isSpace = function(s,pos) {
 	var c = HxOverrides.cca(s,pos);
 	if(!(c > 8 && c < 14)) {
@@ -488,6 +564,9 @@ StringTools.rtrim = function(s) {
 };
 StringTools.trim = function(s) {
 	return StringTools.ltrim(StringTools.rtrim(s));
+};
+StringTools.replace = function(s,sub,by) {
+	return s.split(sub).join(by);
 };
 var _$UInt_UInt_$Impl_$ = {};
 _$UInt_UInt_$Impl_$.__name__ = true;
@@ -646,8 +725,31 @@ haxe_io_Bytes.ofString = function(s) {
 	}
 	return new haxe_io_Bytes(new Uint8Array(a).buffer);
 };
+haxe_io_Bytes.ofData = function(b) {
+	var hb = b.hxBytes;
+	if(hb != null) {
+		return hb;
+	}
+	return new haxe_io_Bytes(b);
+};
 haxe_io_Bytes.prototype = {
-	getString: function(pos,len) {
+	blit: function(pos,src,srcpos,len) {
+		if(pos < 0 || srcpos < 0 || len < 0 || pos + len > this.length || srcpos + len > src.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		if(srcpos == 0 && len == src.b.byteLength) {
+			this.b.set(src.b,pos);
+		} else {
+			this.b.set(src.b.subarray(srcpos,srcpos + len),pos);
+		}
+	}
+	,sub: function(pos,len) {
+		if(pos < 0 || len < 0 || pos + len > this.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		return new haxe_io_Bytes(this.b.buffer.slice(pos + this.b.byteOffset,pos + this.b.byteOffset + len));
+	}
+	,getString: function(pos,len) {
 		if(pos < 0 || len < 0 || pos + len > this.length) {
 			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
 		}
@@ -828,6 +930,80 @@ haxe_ds_StringMap.prototype = {
 		return out;
 	}
 	,__class__: haxe_ds_StringMap
+};
+var haxe_io_BytesBuffer = function() {
+	this.b = [];
+};
+haxe_io_BytesBuffer.__name__ = true;
+haxe_io_BytesBuffer.prototype = {
+	getBytes: function() {
+		var bytes = new haxe_io_Bytes(new Uint8Array(this.b).buffer);
+		this.b = null;
+		return bytes;
+	}
+	,__class__: haxe_io_BytesBuffer
+};
+var haxe_io_Output = function() { };
+haxe_io_Output.__name__ = true;
+haxe_io_Output.prototype = {
+	writeByte: function(c) {
+		throw new js__$Boot_HaxeError("Not implemented");
+	}
+	,writeBytes: function(s,pos,len) {
+		if(pos < 0 || len < 0 || pos + len > s.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		var b = s.b;
+		var k = len;
+		while(k > 0) {
+			this.writeByte(b[pos]);
+			++pos;
+			--k;
+		}
+		return len;
+	}
+	,flush: function() {
+	}
+	,close: function() {
+	}
+	,__class__: haxe_io_Output
+};
+var haxe_io_BytesOutput = function() {
+	this.b = new haxe_io_BytesBuffer();
+};
+haxe_io_BytesOutput.__name__ = true;
+haxe_io_BytesOutput.__super__ = haxe_io_Output;
+haxe_io_BytesOutput.prototype = $extend(haxe_io_Output.prototype,{
+	writeByte: function(c) {
+		this.b.b.push(c);
+	}
+	,writeBytes: function(buf,pos,len) {
+		var _this = this.b;
+		if(pos < 0 || len < 0 || pos + len > buf.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		var b1 = _this.b;
+		var b2 = buf.b;
+		var _g1 = pos;
+		var _g = pos + len;
+		while(_g1 < _g) {
+			var i = _g1++;
+			_this.b.push(b2[i]);
+		}
+		return len;
+	}
+	,getBytes: function() {
+		return this.b.getBytes();
+	}
+	,__class__: haxe_io_BytesOutput
+});
+var haxe_io_Eof = function() { };
+haxe_io_Eof.__name__ = true;
+haxe_io_Eof.prototype = {
+	toString: function() {
+		return "Eof";
+	}
+	,__class__: haxe_io_Eof
 };
 var haxe_io_Error = { __ename__ : true, __constructs__ : ["Blocked","Overflow","OutsideBounds","Custom"] };
 haxe_io_Error.Blocked = ["Blocked",0];
@@ -1164,6 +1340,106 @@ js_html_compat_Uint8Array._subarray = function(start,end) {
 	a.byteOffset = start;
 	return a;
 };
+var tink__$Url_Url_$Impl_$ = {};
+tink__$Url_Url_$Impl_$.__name__ = true;
+tink__$Url_Url_$Impl_$.makePayload = function(parts) {
+	var payload = "";
+	if(parts.auth == null) {
+		if(parts.host != null) {
+			var host = parts.host;
+			payload += "//" + host;
+		}
+	} else if(parts.host == null) {
+		var auth = parts.auth;
+		payload += "//" + auth + "@";
+	} else {
+		var auth1 = parts.auth;
+		var host1 = parts.host;
+		payload += "//" + auth1 + "@" + host1;
+	}
+	payload += parts.path;
+	var _g = parts.query;
+	if(_g != null) {
+		var v = _g;
+		payload += "?" + v;
+	}
+	var _g1 = parts.hash;
+	if(_g1 != null) {
+		var v1 = _g1;
+		payload += "#" + v1;
+	}
+	parts.payload = payload.toString();
+};
+tink__$Url_Url_$Impl_$.toString = function(this1) {
+	var _g = this1.scheme;
+	if(_g == null) {
+		return this1.payload;
+	} else {
+		return "" + this1.scheme + ":" + this1.payload;
+	}
+};
+tink__$Url_Url_$Impl_$.parse = function(s) {
+	if(s == null) {
+		return tink__$Url_Url_$Impl_$.parse("");
+	}
+	s = StringTools.trim(s);
+	if(StringTools.startsWith(s,"data:")) {
+		var this1 = { scheme : "data", payload : HxOverrides.substr(s,5,null)};
+		return this1;
+	}
+	var FORMAT = new EReg("^(([a-zA-Z][a-zA-Z0-9\\-+.]*):)?((//(([^@/]+)@)?([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?)$","");
+	var HOST = new EReg("^(\\[(.*)\\]|([^:]*))(:(\\d*))?$","");
+	FORMAT.match(s);
+	var hosts;
+	var _g = FORMAT.matched(7);
+	if(_g == null) {
+		hosts = [];
+	} else {
+		var v = _g;
+		var _g1 = [];
+		var _g11 = 0;
+		var _g2 = v.split(",");
+		while(_g11 < _g2.length) {
+			var host = _g2[_g11];
+			++_g11;
+			HOST.match(host);
+			var host1;
+			var _g3 = HOST.matched(2);
+			var _g4 = HOST.matched(3);
+			if(_g3 == null) {
+				var ipv4 = _g4;
+				host1 = ipv4;
+			} else if(_g4 == null) {
+				var ipv6 = _g3;
+				host1 = "[" + ipv6 + "]";
+			} else {
+				throw new js__$Boot_HaxeError("assert");
+			}
+			var port;
+			var _g5 = HOST.matched(5);
+			if(_g5 == null) {
+				port = null;
+			} else {
+				var v1 = _g5;
+				var _g51 = Std.parseInt(v1);
+				if(_g51 == null) {
+					throw new js__$Boot_HaxeError("Invalid port");
+				} else {
+					var p = _g51;
+					port = p;
+				}
+			}
+			_g1.push(tink_url__$Host_Host_$Impl_$._new(host1,port));
+		}
+		hosts = _g1;
+	}
+	var path = FORMAT.matched(8);
+	if(hosts.length > 0 && path.charAt(0) != "/") {
+		path = "/" + path;
+	}
+	var this2 = { scheme : FORMAT.matched(2), payload : FORMAT.matched(3), host : hosts[0], hosts : hosts, auth : FORMAT.matched(6), path : tink_url__$Path_Path_$Impl_$.ofString(path), query : FORMAT.matched(10), hash : FORMAT.matched(12)};
+	return this2;
+};
 var tink_core__$Callback_Callback_$Impl_$ = {};
 tink_core__$Callback_Callback_$Impl_$.__name__ = true;
 tink_core__$Callback_Callback_$Impl_$.fromNiladic = function(f) {
@@ -1321,6 +1597,9 @@ tink_core__$Lazy_LazyConst.prototype = {
 	get: function() {
 		return this.value;
 	}
+	,map: function(f) {
+		return new tink_core__$Lazy_LazyConst(f(this.value));
+	}
 	,__class__: tink_core__$Lazy_LazyConst
 };
 var tink_core__$Future_SyncFuture = function(value) {
@@ -1329,11 +1608,115 @@ var tink_core__$Future_SyncFuture = function(value) {
 tink_core__$Future_SyncFuture.__name__ = true;
 tink_core__$Future_SyncFuture.__interfaces__ = [tink_core__$Future_FutureObject];
 tink_core__$Future_SyncFuture.prototype = {
-	handle: function(cb) {
+	map: function(f) {
+		return new tink_core__$Future_SyncFuture(this.value.map(f));
+	}
+	,flatMap: function(f) {
+		var l = this.value.map(f);
+		return new tink_core__$Future_SimpleFuture(function(cb) {
+			return l.get().handle(cb);
+		});
+	}
+	,handle: function(cb) {
 		cb(this.value.get());
 		return null;
 	}
+	,gather: function() {
+		return this;
+	}
 	,__class__: tink_core__$Future_SyncFuture
+};
+var tink_core__$Future_Future_$Impl_$ = {};
+tink_core__$Future_Future_$Impl_$.__name__ = true;
+tink_core__$Future_Future_$Impl_$.next = function(this1,n) {
+	return this1.flatMap(function(v) {
+		return n(v);
+	});
+};
+tink_core__$Future_Future_$Impl_$.flatten = function(f) {
+	return new tink_core__$Future_NestedFuture(f);
+};
+tink_core__$Future_Future_$Impl_$.async = function(f,lazy) {
+	if(lazy == null) {
+		lazy = false;
+	}
+	if(lazy) {
+		var f1 = f;
+		return tink_core__$Future_Future_$Impl_$.flatten(new tink_core__$Future_SyncFuture(new tink_core__$Lazy_LazyFunc(function() {
+			return tink_core__$Future_Future_$Impl_$.async(f1,false);
+		})));
+	} else {
+		var op = new tink_core_FutureTrigger();
+		f($bind(op,op.trigger));
+		return op;
+	}
+};
+var tink_core__$Future_SimpleFuture = function(f) {
+	this.f = f;
+};
+tink_core__$Future_SimpleFuture.__name__ = true;
+tink_core__$Future_SimpleFuture.__interfaces__ = [tink_core__$Future_FutureObject];
+tink_core__$Future_SimpleFuture.prototype = {
+	handle: function(callback) {
+		return this.f(callback);
+	}
+	,map: function(f) {
+		var _gthis = this;
+		return new tink_core__$Future_SimpleFuture(function(cb) {
+			return _gthis.f(function(v) {
+				var data = f(v);
+				cb(data);
+			});
+		});
+	}
+	,flatMap: function(f) {
+		var f1 = f;
+		var _gthis = this;
+		return tink_core__$Future_Future_$Impl_$.flatten(new tink_core__$Future_SimpleFuture(function(cb) {
+			return _gthis.f(function(v) {
+				var data = f1(v);
+				cb(data);
+			});
+		}));
+	}
+	,gather: function() {
+		return tink_core_FutureTrigger.gatherFuture(this);
+	}
+	,__class__: tink_core__$Future_SimpleFuture
+};
+var tink_core__$Future_NestedFuture = function(outer) {
+	this.outer = outer;
+};
+tink_core__$Future_NestedFuture.__name__ = true;
+tink_core__$Future_NestedFuture.__interfaces__ = [tink_core__$Future_FutureObject];
+tink_core__$Future_NestedFuture.prototype = {
+	map: function(f) {
+		var ret = this.outer.flatMap(function(inner) {
+			var ret1 = inner.map(f);
+			return ret1.gather();
+		});
+		return ret.gather();
+	}
+	,flatMap: function(f) {
+		var ret = this.outer.flatMap(function(inner) {
+			var ret1 = inner.flatMap(f);
+			return ret1.gather();
+		});
+		return ret.gather();
+	}
+	,gather: function() {
+		return tink_core_FutureTrigger.gatherFuture(this);
+	}
+	,handle: function(cb) {
+		var ret = null;
+		ret = this.outer.handle(function(inner) {
+			ret = inner.handle(function(result) {
+				cb(result);
+			});
+		});
+		return ret;
+	}
+	,__class__: tink_core__$Future_NestedFuture
 };
 var tink_core_FutureTrigger = function() {
 	var this1 = [];
@@ -1341,6 +1724,18 @@ var tink_core_FutureTrigger = function() {
 };
 tink_core_FutureTrigger.__name__ = true;
 tink_core_FutureTrigger.__interfaces__ = [tink_core__$Future_FutureObject];
+tink_core_FutureTrigger.gatherFuture = function(f) {
+	var op = null;
+	var this1 = new tink_core__$Future_SimpleFuture(function(cb) {
+		if(op == null) {
+			op = new tink_core_FutureTrigger();
+			f.handle($bind(op,op.trigger));
+			f = null;
+		}
+		return op.handle(cb);
+	});
+	return this1;
+};
 tink_core_FutureTrigger.prototype = {
 	handle: function(callback) {
 		var _g = this.list;
@@ -1351,6 +1746,36 @@ tink_core_FutureTrigger.prototype = {
 			var v = _g;
 			return tink_core__$Callback_CallbackList_$Impl_$.add(v,callback);
 		}
+	}
+	,map: function(f) {
+		var _g = this.list;
+		if(_g == null) {
+			return new tink_core__$Future_SyncFuture(new tink_core__$Lazy_LazyConst(f(this.result)));
+		} else {
+			var v = _g;
+			var ret = new tink_core_FutureTrigger();
+			tink_core__$Callback_CallbackList_$Impl_$.add(this.list,function(v1) {
+				var tmp = f(v1);
+				ret.trigger(tmp);
+			});
+			return ret;
+		}
+	}
+	,flatMap: function(f) {
+		var _g = this.list;
+		if(_g == null) {
+			return f(this.result);
+		} else {
+			var v = _g;
+			var ret = new tink_core_FutureTrigger();
+			tink_core__$Callback_CallbackList_$Impl_$.add(this.list,function(v1) {
+				f(v1).handle($bind(ret,ret.trigger));
+			});
+			return ret;
+		}
+	}
+	,gather: function() {
+		return this;
 	}
 	,trigger: function(result) {
 		if(this.list == null) {
@@ -1376,6 +1801,36 @@ tink_core_FutureTrigger.prototype = {
 		}
 	}
 	,__class__: tink_core_FutureTrigger
+};
+var tink_core__$Lazy_LazyFunc = function(f) {
+	this.f = f;
+};
+tink_core__$Lazy_LazyFunc.__name__ = true;
+tink_core__$Lazy_LazyFunc.__interfaces__ = [tink_core__$Lazy_LazyObject];
+tink_core__$Lazy_LazyFunc.prototype = {
+	get: function() {
+		if(this.f != null) {
+			this.result = this.f();
+			this.f = null;
+		}
+		return this.result;
+	}
+	,map: function(f) {
+		var _gthis = this;
+		return new tink_core__$Lazy_LazyFunc(function() {
+			var tmp = _gthis.get();
+			return f(tmp);
+		});
+	}
+	,__class__: tink_core__$Lazy_LazyFunc
+};
+var tink_core_NamedWith = function(name,value) {
+	this.name = name;
+	this.value = value;
+};
+tink_core_NamedWith.__name__ = true;
+tink_core_NamedWith.prototype = {
+	__class__: tink_core_NamedWith
 };
 var tink_core_Outcome = { __ename__ : true, __constructs__ : ["Success","Failure"] };
 tink_core_Outcome.Success = function(data) { var $x = ["Success",0,data]; $x.__enum__ = tink_core_Outcome; $x.toString = $estr; return $x; };
@@ -1408,6 +1863,923 @@ tink_core_SignalTrigger.__name__ = true;
 tink_core_SignalTrigger.__interfaces__ = [tink_core_SignalObject];
 tink_core_SignalTrigger.prototype = {
 	__class__: tink_core_SignalTrigger
+};
+var tink_http_ClientObject = function() { };
+tink_http_ClientObject.__name__ = true;
+var tink_http_JsClient = function() {
+};
+tink_http_JsClient.__name__ = true;
+tink_http_JsClient.__interfaces__ = [tink_http_ClientObject];
+tink_http_JsClient.prototype = {
+	request: function(req) {
+		var _g = req.header.host;
+		var tmp;
+		if(_g == null) {
+			tmp = "";
+		} else {
+			var v = _g;
+			tmp = "http://" + v;
+		}
+		return this.jsRequest(req,tmp);
+	}
+	,jsRequest: function(req,host) {
+		var _gthis = this;
+		return tink_core__$Future_Future_$Impl_$.async(function(cb) {
+			var http = _gthis.getHttp();
+			var req1 = req.header.method;
+			var tmp = tink__$Url_Url_$Impl_$.toString(req.header.uri);
+			http.open(req1,host + tmp);
+			http.responseType = "arraybuffer";
+			var _g = 0;
+			var _g1 = req.header.fields;
+			while(_g < _g1.length) {
+				var header = _g1[_g];
+				++_g;
+				http.setRequestHeader(header.name,header.value);
+			}
+			http.onreadystatechange = function() {
+				if(http.readyState == 4) {
+					if(http.status != 0) {
+						var headers;
+						var _g2 = http.getAllResponseHeaders();
+						if(_g2 == null) {
+							headers = [];
+						} else {
+							var v = _g2;
+							var _g3 = [];
+							var _g11 = 0;
+							var _g21 = v.split("\r\n");
+							while(_g11 < _g21.length) {
+								var line = _g21[_g11];
+								++_g11;
+								if(line != "") {
+									var s = line.split(": ");
+									_g3.push(new tink_http_HeaderField(tink_http__$Header_HeaderName_$Impl_$.ofString(s[0]),s.slice(1).join(": ")));
+								}
+							}
+							headers = _g3;
+						}
+						var header1 = new tink_http_ResponseHeader(http.status,http.statusText,headers);
+						var tmp1 = new tink_http_ResponseHeader(http.status,http.statusText,headers);
+						var _g12 = http.response;
+						var tmp2;
+						if(_g12 == null) {
+							tmp2 = tink_io_Empty.instance;
+						} else {
+							var v1 = _g12;
+							tmp2 = tink_io__$Source_Source_$Impl_$.fromBytes(haxe_io_Bytes.ofData(v1));
+						}
+						cb(new tink_http_IncomingResponse(tmp1,tmp2));
+					} else {
+						cb(new tink_http_IncomingResponse(new tink_http_ResponseHeader(502,"XMLHttpRequest Error",[]),tink_io_Empty.instance));
+					}
+				}
+			};
+			http.onerror = function() {
+				cb(new tink_http_IncomingResponse(new tink_http_ResponseHeader(502,"XMLHttpRequest Error",[]),tink_io_Empty.instance));
+			};
+			req.body.allSafely().handle(function(bytes) {
+				http.send(new Int8Array(bytes.b.bufferValue));
+			});
+		});
+	}
+	,getHttp: function() {
+		var _g = 0;
+		var _g1 = tink_http_JsClient.factories;
+		while(_g < _g1.length) {
+			var f = _g1[_g];
+			++_g;
+			try {
+				return f();
+			} catch( e ) {
+			}
+		}
+		throw new js__$Boot_HaxeError("No compatible XMLHttpRequest object can be found");
+	}
+	,__class__: tink_http_JsClient
+};
+var tink_http_Header = function(fields) {
+	var tmp;
+	if(fields == null) {
+		tmp = [];
+	} else {
+		var v = fields;
+		tmp = v;
+	}
+	this.fields = tmp;
+};
+tink_http_Header.__name__ = true;
+tink_http_Header.prototype = {
+	__class__: tink_http_Header
+};
+var tink_http__$Header_HeaderName_$Impl_$ = {};
+tink_http__$Header_HeaderName_$Impl_$.__name__ = true;
+tink_http__$Header_HeaderName_$Impl_$.ofString = function(s) {
+	var this1 = s.toLowerCase();
+	return this1;
+};
+var tink_http_HeaderField = function(name,value) {
+	tink_core_NamedWith.call(this,name,value);
+};
+tink_http_HeaderField.__name__ = true;
+tink_http_HeaderField.__super__ = tink_core_NamedWith;
+tink_http_HeaderField.prototype = $extend(tink_core_NamedWith.prototype,{
+	__class__: tink_http_HeaderField
+});
+var tink_http_Message = function(header,body) {
+	this.header = header;
+	this.body = body;
+};
+tink_http_Message.__name__ = true;
+tink_http_Message.prototype = {
+	__class__: tink_http_Message
+};
+var tink_http_OutgoingRequestHeader = function(method,host,uri,fields) {
+	this.method = method;
+	this.host = host;
+	if(uri == null) {
+		uri = tink__$Url_Url_$Impl_$.parse("/");
+	}
+	var _g = uri.path;
+	var _hx_tmp;
+	var parts;
+	if(_g == null) {
+		parts = tink_url__$Path_Path_$Impl_$.ofString("/");
+	} else if(_g == "") {
+		parts = tink_url__$Path_Path_$Impl_$.ofString("/");
+	} else {
+		_hx_tmp = _g.charAt(0);
+		if(_hx_tmp == "/") {
+			parts = uri.path;
+		} else {
+			var v = _g;
+			parts = tink_url__$Path_Path_$Impl_$.ofString("/" + v);
+		}
+	}
+	var this1 = { path : parts, query : uri.query, payload : null};
+	uri = this1;
+	tink__$Url_Url_$Impl_$.makePayload(uri);
+	this.uri = uri;
+	tink_http_Header.call(this,fields);
+};
+tink_http_OutgoingRequestHeader.__name__ = true;
+tink_http_OutgoingRequestHeader.__super__ = tink_http_Header;
+tink_http_OutgoingRequestHeader.prototype = $extend(tink_http_Header.prototype,{
+	__class__: tink_http_OutgoingRequestHeader
+});
+var tink_http_OutgoingRequest = function(header,body) {
+	tink_http_Message.call(this,header,body);
+};
+tink_http_OutgoingRequest.__name__ = true;
+tink_http_OutgoingRequest.__super__ = tink_http_Message;
+tink_http_OutgoingRequest.prototype = $extend(tink_http_Message.prototype,{
+	__class__: tink_http_OutgoingRequest
+});
+var tink_http_ResponseHeader = function(statusCode,reason,fields,protocol) {
+	if(protocol == null) {
+		protocol = "HTTP/1.1";
+	}
+	this.statusCode = statusCode;
+	this.reason = reason;
+	this.protocol = protocol;
+	tink_http_Header.call(this,fields);
+};
+tink_http_ResponseHeader.__name__ = true;
+tink_http_ResponseHeader.__super__ = tink_http_Header;
+tink_http_ResponseHeader.prototype = $extend(tink_http_Header.prototype,{
+	__class__: tink_http_ResponseHeader
+});
+var tink_http_IncomingResponse = function(header,body) {
+	tink_http_Message.call(this,header,body);
+};
+tink_http_IncomingResponse.__name__ = true;
+tink_http_IncomingResponse.__super__ = tink_http_Message;
+tink_http_IncomingResponse.prototype = $extend(tink_http_Message.prototype,{
+	__class__: tink_http_IncomingResponse
+});
+var tink_io__$Buffer_Mutex = function() {
+};
+tink_io__$Buffer_Mutex.__name__ = true;
+tink_io__$Buffer_Mutex.prototype = {
+	__class__: tink_io__$Buffer_Mutex
+};
+var tink_io_Buffer = function(bytes,width) {
+	this.available = 0;
+	this.writable = true;
+	this.retainCount = 0;
+	this.zero = 0;
+	this.width = 0;
+	this.bytes = bytes;
+	this.raw = bytes.b.bufferValue;
+	this.width = width;
+};
+tink_io_Buffer.__name__ = true;
+tink_io_Buffer.poolBytes = function(b,width) {
+	if(width >= 10) {
+		var _this = tink_io_Buffer.mutex;
+		tink_io_Buffer.pool[width - 10].push(b);
+	}
+};
+tink_io_Buffer.alloc = function(width) {
+	if(width == null) {
+		width = 15;
+	}
+	if(width < 10) {
+		width = 10;
+	}
+	if(width > 28) {
+		width = 28;
+	}
+	return new tink_io_Buffer(tink_io_Buffer.allocBytes(width),width);
+};
+tink_io_Buffer.allocBytes = function(width) {
+	var _this = tink_io_Buffer.mutex;
+	var _g = tink_io_Buffer.pool[width - 10].pop();
+	if(_g == null) {
+		return new haxe_io_Bytes(new ArrayBuffer(1 << width));
+	} else {
+		var v = _g;
+		return v;
+	}
+};
+tink_io_Buffer.unmanaged = function(bytes) {
+	return new tink_io_Buffer(bytes,-1);
+};
+tink_io_Buffer.wrap = function(bytes,start,len) {
+	var ret = tink_io_Buffer.unmanaged(bytes);
+	ret.zero = start;
+	ret.available = len;
+	return ret;
+};
+tink_io_Buffer.prototype = {
+	retain: function() {
+		this.retainCount++;
+		var self = this;
+		return function() {
+			if(self == null) {
+				return;
+			}
+			if(--self.retainCount == 0) {
+				self.dispose();
+			}
+			self = null;
+		};
+	}
+	,get_end: function() {
+		return (this.zero + this.available) % this.bytes.length;
+	}
+	,seal: function() {
+		this.writable = false;
+	}
+	,safely: function(operation,f) {
+		try {
+			return tink_core_Outcome.Success(f());
+		} catch( $e0 ) {
+			if ($e0 instanceof js__$Boot_HaxeError) $e0 = $e0.val;
+			if( js_Boot.__instanceof($e0,haxe_io_Error) ) {
+				var e = $e0;
+				return tink_core_Outcome.Success(e == haxe_io_Error.Blocked ? 0 : -1);
+			} else if( js_Boot.__instanceof($e0,haxe_io_Eof) ) {
+				var e1 = $e0;
+				return tink_core_Outcome.Success(-1);
+			} else if( js_Boot.__instanceof($e0,tink_core_TypedError) ) {
+				var e2 = $e0;
+				return tink_core_Outcome.Failure(e2);
+			} else {
+			var e3 = $e0;
+			return tink_core_Outcome.Failure(tink_core_TypedError.withData(null,"" + operation + " due to " + Std.string(e3),e3,{ fileName : "Buffer.hx", lineNumber : 103, className : "tink.io.Buffer", methodName : "safely"}));
+			}
+		}
+	}
+	,tryWritingTo: function(name,dest,max) {
+		if(max == null) {
+			max = 268435456;
+		}
+		var f = $bind(this,this.writeTo);
+		var a1 = dest;
+		var a2 = max;
+		return this.safely("Failed writing to " + name,function() {
+			return f(a1,a2);
+		});
+	}
+	,writeTo: function(dest,max) {
+		if(max == null) {
+			max = 268435456;
+		}
+		if(this.available == 0) {
+			if(this.writable) {
+				return 0;
+			} else {
+				this.dispose();
+				return -1;
+			}
+		}
+		var toWrite = this.zero + this.available > this.bytes.length ? this.bytes.length - this.zero : this.available;
+		if(max < 0) {
+			max = 0;
+		}
+		if(max < toWrite) {
+			toWrite = max;
+		}
+		var transfered = dest.writeBytes(this.bytes,this.zero,toWrite);
+		if(transfered > 0) {
+			this.zero = (this.zero + transfered) % this.bytes.length;
+			this.available -= transfered;
+		}
+		if(!this.writable && this.available == 0) {
+			this.dispose();
+		}
+		var this1 = transfered;
+		return this1;
+	}
+	,readFrom: function(source,max) {
+		if(max == null) {
+			max = 268435456;
+		}
+		if(!this.writable) {
+			return -1;
+		}
+		if(this.available == this.bytes.length) {
+			return 0;
+		}
+		var toRead = this.get_end() < this.zero ? this.bytes.length - this.available : this.bytes.length - this.get_end();
+		if(max < 0) {
+			max = 0;
+		}
+		if(max < toRead) {
+			toRead = max;
+		}
+		var transfered = source.readBytes(this.bytes,this.get_end(),toRead);
+		if(transfered > 0) {
+			this.available += transfered;
+		}
+		var this1 = transfered;
+		return this1;
+	}
+	,dispose: function() {
+		if(this.bytes.length > 0) {
+			var old = this.bytes;
+			this.bytes = tink_io_Buffer.ZERO_BYTES;
+			this.raw = this.bytes.b.bufferValue;
+			this.zero = 0;
+			this.available = 0;
+			tink_io_Buffer.poolBytes(old,this.width);
+		}
+	}
+	,__class__: tink_io_Buffer
+};
+var tink_io__$IdealSink_IdealSink_$Impl_$ = {};
+tink_io__$IdealSink_IdealSink_$Impl_$.__name__ = true;
+tink_io__$IdealSink_IdealSink_$Impl_$.inMemory = function(whenDone,buffer) {
+	return new tink_io__$IdealSink_MemorySink(whenDone,buffer);
+};
+var tink_io_SinkObject = function() { };
+tink_io_SinkObject.__name__ = true;
+tink_io_SinkObject.prototype = {
+	__class__: tink_io_SinkObject
+};
+var tink_io_IdealSinkObject = function() { };
+tink_io_IdealSinkObject.__name__ = true;
+tink_io_IdealSinkObject.__interfaces__ = [tink_io_SinkObject];
+var tink_io_SinkBase = function() { };
+tink_io_SinkBase.__name__ = true;
+tink_io_SinkBase.__interfaces__ = [tink_io_SinkObject];
+tink_io_SinkBase.prototype = {
+	write: function(from) {
+		throw new js__$Boot_HaxeError("writing not implemented");
+	}
+	,finish: function(from) {
+		var _gthis = this;
+		return tink_core__$Future_Future_$Impl_$.async(function(cb) {
+			tink_io__$Sink_Sink_$Impl_$.writeFull(_gthis,from).handle(function(o) {
+				switch(o[1]) {
+				case 0:
+					switch(o[2]) {
+					case false:
+						cb(tink_core_Outcome.Success(tink_core_Noise.Noise));
+						break;
+					case true:
+						_gthis.close().handle(cb);
+						break;
+					}
+					break;
+				case 1:
+					var e = o[2];
+					cb(tink_core_Outcome.Failure(e));
+					break;
+				}
+			});
+		});
+	}
+	,close: function() {
+		return new tink_core__$Future_SyncFuture(new tink_core__$Lazy_LazyConst(tink_core_Outcome.Success(tink_core_Noise.Noise)));
+	}
+	,__class__: tink_io_SinkBase
+};
+var tink_io_IdealSinkBase = function() { };
+tink_io_IdealSinkBase.__name__ = true;
+tink_io_IdealSinkBase.__interfaces__ = [tink_io_IdealSinkObject];
+tink_io_IdealSinkBase.__super__ = tink_io_SinkBase;
+tink_io_IdealSinkBase.prototype = $extend(tink_io_SinkBase.prototype,{
+	writeSafely: function(from) {
+		throw new js__$Boot_HaxeError("not implemented");
+	}
+	,closeSafely: function() {
+		return new tink_core__$Future_SyncFuture(new tink_core__$Lazy_LazyConst(tink_core_Noise.Noise));
+	}
+	,write: function(from) {
+		var ret = this.writeSafely(from).map(tink_core_Outcome.Success);
+		return ret.gather();
+	}
+	,close: function() {
+		var ret = this.closeSafely().map(tink_core_Outcome.Success);
+		return ret.gather();
+	}
+	,__class__: tink_io_IdealSinkBase
+});
+var tink_io__$IdealSink_MemorySink = function(whenDone,buffer) {
+	this.whenDone = whenDone;
+	var tmp;
+	if(buffer == null) {
+		tmp = new haxe_io_BytesBuffer();
+	} else {
+		var v = buffer;
+		tmp = v;
+	}
+	this.buffer = tmp;
+};
+tink_io__$IdealSink_MemorySink.__name__ = true;
+tink_io__$IdealSink_MemorySink.__super__ = tink_io_IdealSinkBase;
+tink_io__$IdealSink_MemorySink.prototype = $extend(tink_io_IdealSinkBase.prototype,{
+	writeBytes: function(b,pos,len) {
+		var _this = this.buffer;
+		if(pos < 0 || len < 0 || pos + len > b.length) {
+			throw new js__$Boot_HaxeError(haxe_io_Error.OutsideBounds);
+		}
+		var b1 = _this.b;
+		var b2 = b.b;
+		var _g1 = pos;
+		var _g = pos + len;
+		while(_g1 < _g) {
+			var i = _g1++;
+			_this.b.push(b2[i]);
+		}
+		return len;
+	}
+	,writeSafely: function(from) {
+		return new tink_core__$Future_SyncFuture(new tink_core__$Lazy_LazyConst(this.buffer == null ? -1 : from.writeTo(this)));
+	}
+	,closeSafely: function() {
+		if(this.buffer != null) {
+			this.whenDone(this.buffer);
+			this.buffer = null;
+			this.whenDone = null;
+		}
+		return tink_io_IdealSinkBase.prototype.closeSafely.call(this);
+	}
+	,__class__: tink_io__$IdealSink_MemorySink
+});
+var tink_io__$IdealSource_IdealSource_$Impl_$ = {};
+tink_io__$IdealSource_IdealSource_$Impl_$.__name__ = true;
+tink_io__$IdealSource_IdealSource_$Impl_$.ofBytes = function(b,offset) {
+	if(offset == null) {
+		offset = 0;
+	}
+	if(b == null) {
+		return tink_io_Empty.instance;
+	} else {
+		return new tink_io_ByteSource(b,offset);
+	}
+};
+tink_io__$IdealSource_IdealSource_$Impl_$.fromString = function(s) {
+	if(s == null) {
+		return tink_io_Empty.instance;
+	} else {
+		return tink_io__$IdealSource_IdealSource_$Impl_$.ofBytes(haxe_io_Bytes.ofString(s),null);
+	}
+};
+var tink_io_SourceObject = function() { };
+tink_io_SourceObject.__name__ = true;
+tink_io_SourceObject.prototype = {
+	__class__: tink_io_SourceObject
+};
+var tink_io_IdealSourceObject = function() { };
+tink_io_IdealSourceObject.__name__ = true;
+tink_io_IdealSourceObject.__interfaces__ = [tink_io_SourceObject];
+tink_io_IdealSourceObject.prototype = {
+	__class__: tink_io_IdealSourceObject
+};
+var tink_io_SourceBase = function() { };
+tink_io_SourceBase.__name__ = true;
+tink_io_SourceBase.__interfaces__ = [tink_io_SourceObject];
+tink_io_SourceBase.prototype = {
+	read: function(into,max) {
+		if(max == null) {
+			max = 1073741824;
+		}
+		throw new js__$Boot_HaxeError("not implemented");
+	}
+	,close: function() {
+		return new tink_core__$Future_SyncFuture(new tink_core__$Lazy_LazyConst(tink_core_Outcome.Success(tink_core_Noise.Noise)));
+	}
+	,pipeTo: function(dest,options) {
+		var _gthis = this;
+		return tink_core__$Future_Future_$Impl_$.async(function(cb) {
+			var this1 = _gthis;
+			tink_io_Pipe.make(this1,dest,null,options,function(_,res) {
+				cb(res);
+			});
+		});
+	}
+	,all: function() {
+		var _gthis = this;
+		var out = new haxe_io_BytesOutput();
+		return tink_core__$Future_Future_$Impl_$.async(function(cb) {
+			var this1 = tink_io__$Sink_Sink_$Impl_$.ofOutput("memory buffer",out);
+			_gthis.pipeTo(this1).handle(function(r) {
+				var tmp;
+				switch(r[1]) {
+				case 0:
+					tmp = tink_core_Outcome.Success(out.getBytes());
+					break;
+				case 3:
+					var e = r[2];
+					tmp = tink_core_Outcome.Failure(e);
+					break;
+				default:
+					throw new js__$Boot_HaxeError("assert");
+				}
+				cb(tmp);
+			});
+		});
+	}
+	,__class__: tink_io_SourceBase
+};
+var tink_io_IdealSourceBase = function() { };
+tink_io_IdealSourceBase.__name__ = true;
+tink_io_IdealSourceBase.__interfaces__ = [tink_io_IdealSourceObject];
+tink_io_IdealSourceBase.__super__ = tink_io_SourceBase;
+tink_io_IdealSourceBase.prototype = $extend(tink_io_SourceBase.prototype,{
+	allSafely: function() {
+		var _gthis = this;
+		return tink_core__$Future_Future_$Impl_$.async(function(cb) {
+			var this1 = tink_io__$IdealSink_IdealSink_$Impl_$.inMemory(function(buf) {
+				var s = buf.getBytes();
+				cb(s);
+			});
+			_gthis.pipeSafelyTo(this1,{ end : true});
+		});
+	}
+	,all: function() {
+		var ret = this.allSafely().map(tink_core_Outcome.Success);
+		return ret.gather();
+	}
+	,readSafely: function(into,max) {
+		if(max == null) {
+			max = 268435456;
+		}
+		throw new js__$Boot_HaxeError("abstract");
+	}
+	,closeSafely: function() {
+		throw new js__$Boot_HaxeError("abstract");
+	}
+	,close: function() {
+		var ret = this.closeSafely().map(tink_core_Outcome.Success);
+		return ret.gather();
+	}
+	,read: function(into,max) {
+		if(max == null) {
+			max = 268435456;
+		}
+		var ret = this.readSafely(into,max).map(tink_core_Outcome.Success);
+		return ret.gather();
+	}
+	,pipeSafelyTo: function(dest,options) {
+		var _gthis = this;
+		return tink_core__$Future_Future_$Impl_$.async(function(cb) {
+			var this1 = _gthis;
+			tink_io_Pipe.make(this1,dest,null,options,function(_,res) {
+				cb(res);
+			});
+		});
+	}
+	,__class__: tink_io_IdealSourceBase
+});
+var tink_io_Empty = function() {
+};
+tink_io_Empty.__name__ = true;
+tink_io_Empty.__super__ = tink_io_IdealSourceBase;
+tink_io_Empty.prototype = $extend(tink_io_IdealSourceBase.prototype,{
+	readSafely: function(into,max) {
+		if(max == null) {
+			max = 268435456;
+		}
+		return new tink_core__$Future_SyncFuture(new tink_core__$Lazy_LazyConst(-1));
+	}
+	,closeSafely: function() {
+		return new tink_core__$Future_SyncFuture(new tink_core__$Lazy_LazyConst(tink_core_Noise.Noise));
+	}
+	,__class__: tink_io_Empty
+});
+var tink_io_ByteSource = function(data,offset) {
+	if(offset == null) {
+		offset = 0;
+	}
+	this.data = data;
+	this.pos = offset;
+};
+tink_io_ByteSource.__name__ = true;
+tink_io_ByteSource.__super__ = tink_io_IdealSourceBase;
+tink_io_ByteSource.prototype = $extend(tink_io_IdealSourceBase.prototype,{
+	readBytes: function(into,offset,len) {
+		if(this.pos >= this.data.length) {
+			return -1;
+		} else if(len <= 0) {
+			return 0;
+		} else if(this.pos + len > this.data.length) {
+			return this.readBytes(into,offset,this.data.length - this.pos);
+		} else {
+			into.blit(offset,this.data,this.pos,len);
+			this.pos += len;
+			return len;
+		}
+	}
+	,allSafely: function() {
+		var ret = this.pos == 0 ? this.data : this.data.sub(this.pos,this.data.length - this.pos);
+		this.data = tink_io_Buffer.ZERO_BYTES;
+		this.pos = 0;
+		return new tink_core__$Future_SyncFuture(new tink_core__$Lazy_LazyConst(ret));
+	}
+	,pipeTo: function(dest,options) {
+		var _gthis = this;
+		var dest1 = dest;
+		var buf = tink_io_Buffer.wrap(this.data,this.pos,this.data.length - this.pos);
+		var initial = buf.available;
+		return tink_core__$Future_Future_$Impl_$.async(function(cb) {
+			tink_io__$Sink_Sink_$Impl_$.writeFull(dest1,buf).handle(function(o) {
+				_gthis.pos += buf.available - initial;
+				var tmp;
+				switch(o[1]) {
+				case 0:
+					switch(o[2]) {
+					case false:
+						tmp = tink_io_PipeResult.SinkEnded;
+						break;
+					case true:
+						if(options != null && options.end) {
+							dest1.close();
+						}
+						tmp = tink_io_PipeResult.AllWritten;
+						break;
+					}
+					break;
+				case 1:
+					var e = o[2];
+					tmp = tink_io_PipeResult.SinkFailed(e);
+					break;
+				}
+				cb(tmp);
+				if(_gthis.pos == _gthis.data.length) {
+					_gthis.closeSafely();
+				}
+			});
+		});
+	}
+	,readSafely: function(into,max) {
+		if(max == null) {
+			max = 268435456;
+		}
+		return new tink_core__$Future_SyncFuture(new tink_core__$Lazy_LazyConst(into.readFrom(this,max)));
+	}
+	,closeSafely: function() {
+		this.data = tink_io_Buffer.ZERO_BYTES;
+		this.pos = 0;
+		return new tink_core__$Future_SyncFuture(new tink_core__$Lazy_LazyConst(tink_core_Noise.Noise));
+	}
+	,__class__: tink_io_ByteSource
+});
+var tink_io_Pipe = function(source,dest,bufferWidth,autoClose,onDone) {
+	if(autoClose == null) {
+		autoClose = false;
+	}
+	this.bufferWidth = bufferWidth != null ? bufferWidth : 15;
+	this.autoClose = autoClose;
+	this.source = source;
+	this.dest = dest;
+	this.onDone = onDone;
+};
+tink_io_Pipe.__name__ = true;
+tink_io_Pipe.make = function(from,to,bufferWidth,options,cb) {
+	new tink_io_Pipe(from,to,bufferWidth,options != null && options.end,function(buf,res) {
+		cb(buf,res);
+	}).resume();
+};
+tink_io_Pipe.prototype = {
+	terminate: function(s) {
+		this.onDone(this.buffer,s);
+		this.releaseBuffer();
+	}
+	,releaseBuffer: function() {
+	}
+	,suspend: function() {
+		if(this.bufferWidth > 0) {
+			var _g = tink_io_Pipe.suspended.pop();
+			if(_g == null) {
+				this.read();
+			} else {
+				var next = _g;
+				this.releaseBuffer();
+				tink_io_Pipe.suspended.add(this);
+				next.resume();
+			}
+		} else {
+			this.read();
+		}
+	}
+	,resume: function() {
+		if(this.buffer == null) {
+			this.buffer = tink_io_Buffer.alloc(this.bufferWidth);
+			this.releaseBuffer = this.buffer.retain();
+		}
+		this.read();
+	}
+	,read: function() {
+		var _gthis = this;
+		this.source.read(this.buffer,1073741824).handle(function(o) {
+			switch(o[1]) {
+			case 0:
+				var _hx_tmp = o[2] < 0;
+				if(_hx_tmp == true) {
+					_gthis.source.close();
+					_gthis.buffer.seal();
+					_gthis.flush();
+				} else {
+					var v = o[2];
+					if(v == 0 && _gthis.buffer.available == 0) {
+						_gthis.suspend();
+					} else {
+						_gthis.flush();
+					}
+				}
+				break;
+			case 1:
+				var e = o[2];
+				_gthis.terminate(tink_io_PipeResult.SourceFailed(e));
+				break;
+			}
+		});
+	}
+	,flush: function(repeat) {
+		if(repeat == null) {
+			repeat = 1;
+		}
+		var _gthis = this;
+		if(this.buffer.writable || !this.autoClose) {
+			this.dest.write(this.buffer).handle(function(o) {
+				switch(o[1]) {
+				case 0:
+					var _hx_tmp = o[2] < 0;
+					if(_hx_tmp == true) {
+						_gthis.terminate(_gthis.buffer.available > 0 ? tink_io_PipeResult.SinkEnded : tink_io_PipeResult.AllWritten);
+					} else {
+						var v = o[2];
+						if(repeat > 0) {
+							_gthis.flush(repeat - (v == 0 ? 1 : 0));
+						} else if(_gthis.buffer.writable) {
+							_gthis.read();
+						} else {
+							_gthis.flush();
+						}
+					}
+					break;
+				case 1:
+					var f = o[2];
+					_gthis.source.close();
+					_gthis.terminate(tink_io_PipeResult.SinkFailed(f));
+					break;
+				}
+			});
+		} else {
+			this.dest.finish(this.buffer).handle(function(o1) {
+				switch(o1[1]) {
+				case 0:
+					_gthis.terminate(_gthis.buffer.available > 0 ? tink_io_PipeResult.SinkEnded : tink_io_PipeResult.AllWritten);
+					break;
+				case 1:
+					var f1 = o1[2];
+					_gthis.terminate(tink_io_PipeResult.SinkFailed(f1));
+					break;
+				}
+			});
+		}
+	}
+	,__class__: tink_io_Pipe
+};
+var tink_io_PipeResult = { __ename__ : true, __constructs__ : ["AllWritten","SinkFailed","SinkEnded","SourceFailed"] };
+tink_io_PipeResult.AllWritten = ["AllWritten",0];
+tink_io_PipeResult.AllWritten.toString = $estr;
+tink_io_PipeResult.AllWritten.__enum__ = tink_io_PipeResult;
+tink_io_PipeResult.SinkFailed = function(e) { var $x = ["SinkFailed",1,e]; $x.__enum__ = tink_io_PipeResult; $x.toString = $estr; return $x; };
+tink_io_PipeResult.SinkEnded = ["SinkEnded",2];
+tink_io_PipeResult.SinkEnded.toString = $estr;
+tink_io_PipeResult.SinkEnded.__enum__ = tink_io_PipeResult;
+tink_io_PipeResult.SourceFailed = function(e) { var $x = ["SourceFailed",3,e]; $x.__enum__ = tink_io_PipeResult; $x.toString = $estr; return $x; };
+var tink_io__$Sink_Sink_$Impl_$ = {};
+tink_io__$Sink_Sink_$Impl_$.__name__ = true;
+tink_io__$Sink_Sink_$Impl_$.writeFull = function(this1,buffer) {
+	var self = this1;
+	return tink_core__$Future_Future_$Impl_$.async(function(cb) {
+		var flush = null;
+		flush = function() {
+			if(buffer.available == 0) {
+				cb(tink_core_Outcome.Success(true));
+			} else {
+				self.write(buffer).handle(function(o) {
+					switch(o[1]) {
+					case 0:
+						var p = o[2];
+						if(p < 0) {
+							cb(tink_core_Outcome.Success(false));
+						} else {
+							flush();
+						}
+						break;
+					case 1:
+						var e = o[2];
+						cb(tink_core_Outcome.Failure(e));
+						break;
+					}
+				});
+			}
+		};
+		var flush1 = flush;
+		flush1();
+	});
+};
+tink_io__$Sink_Sink_$Impl_$.ofOutput = function(name,target,worker) {
+	return new tink_io_StdSink(name,target,worker);
+};
+var tink_io_StdSink = function(name,target,worker) {
+	this.name = name;
+	this.target = target;
+	this.worker = tink_io__$Worker_Worker_$Impl_$.ensure(worker);
+};
+tink_io_StdSink.__name__ = true;
+tink_io_StdSink.__super__ = tink_io_SinkBase;
+tink_io_StdSink.prototype = $extend(tink_io_SinkBase.prototype,{
+	write: function(from) {
+		var _gthis = this;
+		return tink_io__$Worker_Worker_$Impl_$.work(this.worker,new tink_core__$Lazy_LazyFunc(function() {
+			var ret = from.tryWritingTo(_gthis.name,_gthis.target);
+			_gthis.target.flush();
+			return ret;
+		}));
+	}
+	,close: function() {
+		var _gthis = this;
+		return tink_io__$Worker_Worker_$Impl_$.work(this.worker,new tink_core__$Lazy_LazyFunc(function() {
+			return tink_core_TypedError.catchExceptions(function() {
+				_gthis.target.close();
+				return tink_core_Noise.Noise;
+			},tink_core_TypedError.reporter(null,"Failed to close " + _gthis.name,{ fileName : "Sink.hx", lineNumber : 159, className : "tink.io.StdSink", methodName : "close"}),{ fileName : "Sink.hx", lineNumber : 154, className : "tink.io.StdSink", methodName : "close"});
+		}));
+	}
+	,__class__: tink_io_StdSink
+});
+var tink_io__$Source_Source_$Impl_$ = {};
+tink_io__$Source_Source_$Impl_$.__name__ = true;
+tink_io__$Source_Source_$Impl_$.fromBytes = function(b) {
+	return b == null ? tink_io_Empty.instance : new tink_io_ByteSource(b,0);
+};
+var tink_io_WorkerObject = function() { };
+tink_io_WorkerObject.__name__ = true;
+tink_io_WorkerObject.prototype = {
+	__class__: tink_io_WorkerObject
+};
+var tink_io__$Worker_EagerWorker = function() {
+};
+tink_io__$Worker_EagerWorker.__name__ = true;
+tink_io__$Worker_EagerWorker.__interfaces__ = [tink_io_WorkerObject];
+tink_io__$Worker_EagerWorker.prototype = {
+	work: function(task) {
+		return new tink_core__$Future_SyncFuture(new tink_core__$Lazy_LazyConst(task.get()));
+	}
+	,__class__: tink_io__$Worker_EagerWorker
+};
+var tink_io__$Worker_Worker_$Impl_$ = {};
+tink_io__$Worker_Worker_$Impl_$.__name__ = true;
+tink_io__$Worker_Worker_$Impl_$.ensure = function(this1) {
+	if(this1 == null) {
+		return tink_io__$Worker_Worker_$Impl_$.get();
+	} else {
+		return this1;
+	}
+};
+tink_io__$Worker_Worker_$Impl_$.get = function() {
+	return tink_io__$Worker_Worker_$Impl_$.pool[Std.random(tink_io__$Worker_Worker_$Impl_$.pool.length)];
+};
+tink_io__$Worker_Worker_$Impl_$.work = function(this1,task) {
+	return this1.work(task);
 };
 var tink_state__$Observable_Observable_$Impl_$ = {};
 tink_state__$Observable_Observable_$Impl_$.__name__ = true;
@@ -1693,6 +3065,70 @@ tink_state__$State_StateObject.prototype = {
 		}
 	}
 	,__class__: tink_state__$State_StateObject
+};
+var tink_url__$Host_Host_$Impl_$ = {};
+tink_url__$Host_Host_$Impl_$.__name__ = true;
+tink_url__$Host_Host_$Impl_$._new = function(name,port) {
+	var this1;
+	if(port == null) {
+		this1 = name;
+	} else if(port > 65535 || port <= 0) {
+		throw new js__$Boot_HaxeError("Invalid port");
+	} else {
+		this1 = "" + name + ":" + port;
+	}
+	return this1;
+};
+var tink_url__$Path_Path_$Impl_$ = {};
+tink_url__$Path_Path_$Impl_$.__name__ = true;
+tink_url__$Path_Path_$Impl_$.ofString = function(s) {
+	var this1 = tink_url__$Path_Path_$Impl_$.normalize(s);
+	return this1;
+};
+tink_url__$Path_Path_$Impl_$.normalize = function(s) {
+	s = StringTools.trim(StringTools.replace(s,"\\","/"));
+	if(s == ".") {
+		return "./";
+	}
+	var isDir = StringTools.endsWith(s,"/..") || StringTools.endsWith(s,"/") || StringTools.endsWith(s,"/.");
+	var parts = [];
+	var isAbsolute = StringTools.startsWith(s,"/");
+	var up = 0;
+	var _g = 0;
+	var _g1 = s.split("/");
+	while(_g < _g1.length) {
+		var part = _g1[_g];
+		++_g;
+		var _g2 = StringTools.trim(part);
+		switch(_g2) {
+		case "":
+			break;
+		case ".":
+			break;
+		case "..":
+			if(parts.pop() == null) {
+				++up;
+			}
+			break;
+		default:
+			var v = _g2;
+			parts.push(v);
+		}
+	}
+	if(isAbsolute) {
+		parts.unshift("");
+	} else {
+		var _g11 = 0;
+		var _g3 = up;
+		while(_g11 < _g3) {
+			var i = _g11++;
+			parts.unshift("..");
+		}
+	}
+	if(isDir) {
+		parts.push("");
+	}
+	return parts.join("/");
 };
 var vdom__$Attr_ClassName_$Impl_$ = {};
 vdom__$Attr_ClassName_$Impl_$.__name__ = true;
@@ -3429,6 +4865,34 @@ haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
 js_Boot.__toStr = ({ }).toString;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
 tink_core_FutureTrigger.depth = 0;
+tink_http_JsClient.factories = [function() {
+	return new XMLHttpRequest();
+},function() {
+	return new ActiveXObject("Msxml2.XMLHTTP");
+},function() {
+	return new ActiveXObject("Msxml3.XMLHTTP");
+},function() {
+	return new ActiveXObject("Microsoft.XMLHTTP");
+}];
+tink_io_Buffer.ZERO_BYTES = new haxe_io_Bytes(new ArrayBuffer(0));
+tink_io_Buffer.mutex = new tink_io__$Buffer_Mutex();
+tink_io_Buffer.pool = (function($this) {
+	var $r;
+	var _g = [];
+	{
+		var _g1 = 10;
+		while(_g1 < 28) {
+			var i = _g1++;
+			_g.push([]);
+		}
+	}
+	$r = _g;
+	return $r;
+}(this));
+tink_io_Empty.instance = new tink_io_Empty();
+tink_io_Pipe.suspended = new List();
+tink_io__$Worker_Worker_$Impl_$.EAGER = new tink_io__$Worker_EagerWorker();
+tink_io__$Worker_Worker_$Impl_$.pool = [tink_io__$Worker_Worker_$Impl_$.EAGER];
 tink_state__$Observable_Observable_$Impl_$.stack = new List();
 tink_state__$Observable_Observable_$Impl_$.scheduled = [];
 tink_state__$Observable_Observable_$Impl_$.hasRAF = typeof window != 'undefined' && 'requestAnimationFrame' in window;

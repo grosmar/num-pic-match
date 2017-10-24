@@ -12,7 +12,7 @@ class NumPicMatchView extends View<{model:NumPicMatchModel}>
 	function render() 
 	{
 		var arr = RandomHelper.shuffle([for (i in (model.min)...model.max+1) i]);
-		trace(arr);
+		var length = (model.max - model.min)+2;
 		
 	
 		return @hxx'
@@ -24,18 +24,18 @@ class NumPicMatchView extends View<{model:NumPicMatchModel}>
 			</div>
 			<div style="height:100%">
 				<div style="float:left; margin: 4px;">
-					<div style={"width:" + Math.floor(100/(model.max+2)) +"vw; height: " + Math.floor(100/(model.max+2)) + "vw; border:1px solid black; font-family:webdings; font-size:" + Math.floor((100/(model.max+2))/(model.rand+1)) + "vw; text-align:center;"}>
+					<div style={"width:" + Math.floor(100/(length+1)) +"vw; height: " + Math.floor(100/(length+1)) + "vw; border:1px solid black; font-family:webdings; font-size:" + Math.floor((100/(length+1))/(model.rand+1)) + "vw; text-align:center;"}>
 					<br/>
 					<for {i in 0...model.rand}>
 						{model.char}
 					</for>
 					</div>
-					<div style={"text-align:center; width:100%; font-size:" + Math.floor(100/(model.max+2)/2) + "vw" }>{model.rand}</div>
+					<div style={"text-align:center; width:100%; font-size:" + Math.floor(100/(length+1)/2) + "vw" }>{model.rand}</div>
 				</div>
 				<for {i in arr}>
 				<div style="float:left; margin: 4px;">
-					<div style={"width:" + Math.floor(100/(model.max+2)) +"vw; height: " + Math.floor(100/(model.max+2)) + "vw; border:1px solid black;"}></div>
-					<div style={"text-align:center; width:100%; font-size:" + Math.floor(100/(model.max+2)/2) + "vw" }>{i}</div>
+					<div style={"width:" + Math.floor(100/(length+1)) +"vw; height: " + Math.floor(100/(length+1)) + "vw; border:1px solid black;"}></div>
+					<div style={"text-align:center; width:100%; font-size:" + Math.floor(100/(length+1)/2) + "vw" }>{i}</div>
 				</div>
 				</for>
 			</div>

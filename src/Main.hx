@@ -3,9 +3,14 @@ package;
 import haxe.Resource;
 import js.Browser;
 import js.Browser;
+import tink.http.Client.JsClient;
+import tink.url.Host;
 import vdom.VDom.*;
 import view.*;
 import coconut.Ui.hxx;
+import tink.http.clients.*;
+import tink.http.Request;
+using tink.io.Source;
 
 
 /**
@@ -42,6 +47,14 @@ class Main
 			Browser.getLocalStorage().setItem("min", Std.string(model.min));
 			Browser.getLocalStorage().setItem("max", Std.string(model.max));
 		}
+		//https://www.googleapis.com/customsearch/v1?key=AIzaSyCpvey7DTytLfh3DXciBVgsOfN8d7rMJCI&cx=015237518444056158239:ylplfaewwwq&searchType=image&imgType=clipart&imgColorType=gray&q=heart
+		/*var client = new JsClient();
+        client.request(new OutgoingRequest(new OutgoingRequestHeader(GET, new Host('ip.jsontest.com'), []), ''))
+            .next(function(res) return res.body.all())
+            .handle(function(o) switch o {
+                case Success(body): trace(body.toString()); // should trace an html page
+                case Failure(e): trace(e);
+            });*/
 	}
 	
 }
