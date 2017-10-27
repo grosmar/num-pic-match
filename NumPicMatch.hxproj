@@ -2,15 +2,15 @@
 <project version="2">
   <!-- Output SWF options -->
   <output>
-    <movie outputType="Application" />
+    <movie outputType="CustomBuild" />
     <movie input="" />
-    <movie path="bin\NumPicMatch.js" />
+    <movie path="build.hxml" />
     <movie fps="0" />
     <movie width="0" />
     <movie height="0" />
     <movie version="0" />
     <movie minorVersion="0" />
-    <movie platform="JavaScript" />
+    <movie platform="hxml" />
     <movie background="#FFFFFF" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
@@ -28,8 +28,12 @@
   </build>
   <!-- haxelib libraries -->
   <haxelib>
+    <library name="tink_lang" />
+    <library name="tink_pure" />
+    <library name="coconut.ui" />
     <library name="coconut.vdom" />
     <library name="tink_http" />
+    <library name="tink_web" />
   </haxelib>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
@@ -40,7 +44,7 @@
     <hidden path="obj" />
   </hiddenPaths>
   <!-- Executed before build -->
-  <preBuildCommand />
+  <preBuildCommand>cmd /c haxe $(OutputFile)</preBuildCommand>
   <!-- Executed after build -->
   <postBuildCommand alwaysRun="False" />
   <!-- Other project options -->

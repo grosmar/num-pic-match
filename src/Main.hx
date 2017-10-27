@@ -1,16 +1,11 @@
 package;
 
-import haxe.Resource;
 import js.Browser;
-import js.Browser;
-import tink.http.Client.JsClient;
+import tink.http.Client.JsSecureClient;
 import tink.url.Host;
-import vdom.VDom.*;
-import view.*;
 import coconut.Ui.hxx;
-import tink.http.clients.*;
 import tink.http.Request;
-using tink.io.Source;
+import tink.web.proxy.Remote;
 
 
 /**
@@ -19,16 +14,23 @@ using tink.io.Source;
  */
 class Main 
 {
+	/*static var api = connect();
+	
+	static function connect()
+	{
+		var client = new JsSecureClient();
+		return new Remote<API>(client, { 
+		  host: new tink.url.Host("www.googleapis.com")
+		});
+	}*/
 	
 	static function main() 
 	{
-		var s = Resource.getString("wordlist");
+
+		//api.getImage("heart").handle( function( o ) { trace( o ); } );
 		
-		var savedFilter:String = "";
-		var savedFixChar:String = "";
-		var savedMin:UInt = 3;
-		var savedMax:UInt = 5;
-		 
+		var savedMin:Int = 0;
+		var savedMax:Int = 5;
 		
 		try
 		{
@@ -37,7 +39,7 @@ class Main
 			savedMax = ls.getItem("max") != null ? Std.parseInt(ls.getItem("max")) : savedMax;
 		}
 		
-		var model = new NumPicMatchModel({min:savedMin, max:savedMax});
+		var model = new NumPicMatchModel({min:savedMin, max:savedMax/*, picService:api.getImage*/});
 		
 		var root = hxx('<NumPicMatchView model={model} />');
 		Browser.document.body.appendChild( root.toElement() );
@@ -47,14 +49,9 @@ class Main
 			Browser.getLocalStorage().setItem("min", Std.string(model.min));
 			Browser.getLocalStorage().setItem("max", Std.string(model.max));
 		}
+		
+		
 		//https://www.googleapis.com/customsearch/v1?key=AIzaSyCpvey7DTytLfh3DXciBVgsOfN8d7rMJCI&cx=015237518444056158239:ylplfaewwwq&searchType=image&imgType=clipart&imgColorType=gray&q=heart
-		/*var client = new JsClient();
-        client.request(new OutgoingRequest(new OutgoingRequestHeader(GET, new Host('ip.jsontest.com'), []), ''))
-            .next(function(res) return res.body.all())
-            .handle(function(o) switch o {
-                case Success(body): trace(body.toString()); // should trace an html page
-                case Failure(e): trace(e);
-            });*/
 	}
 	
 }

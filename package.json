@@ -7,7 +7,7 @@
     "num-pic-match": "NumPicMatch.js"
   },
   "scripts": {
-    "install": "haxelib newrepo && haxelib install coconut.data && haxelib install coconut.vdom"
+    "install": "npm i haxeshim -g && npm i switchx -g && switchx install && npm i lix.pm -g && lix download"
   },
   "repository": {
     "type": "git",
