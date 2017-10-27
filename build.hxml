@@ -1,0 +1,10 @@
+-cp src
+-dce full
+-lib tink_lang
+-lib tink_pure
+-lib coconut.ui
+-lib coconut.vdom
+-lib tink_http
+-lib tink_web
+-main Main
+-js bin/NumPicMatch.js

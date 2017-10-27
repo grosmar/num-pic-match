@@ -1,0 +1,6 @@
+# @install: lix download https://lib.haxe.org/p/tink_multipart/0.2.0/download/ as tink_multipart#0.2.0/haxelib
+-D tink_multipart=0.2.0
+-cp ${HAXESHIM_LIBCACHE}/tink_multipart/0.2.0/haxelib/src
+
+-lib tink_streams
+-lib tink_http
